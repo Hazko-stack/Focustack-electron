@@ -1,10 +1,10 @@
 # Pomodoro Timer - Electron App
 
-Aplikasi Pomodoro Timer yang cantik dan fungsional dibangun dengan Electron.js. Aplikasi ini membantu Anda meningkatkan produktivitas dengan teknik Pomodoro - bekerja selama 25 menit, kemudian istirahat sejenak.
+Aplikasi Pomodoro Timer yang cantik dan fungsional dibangun dengan Electron.js. Aplikasi ini membantu Anda meningkatkan produktivitas dengan teknik Pomodoro - bekerja, kemudian istirahat sejenak.
 
 ## Fitur
 
-- ⏰ Timer 25 menit dengan progress visual yang menarik
+- ⏰ Timer dengan progress visual yang menarik
 - 🔔 Notifikasi suara dan desktop ketika waktu habis
 - ⌨️ Kontrol keyboard shortcuts
 - 🎯 Interface yang simpel dan elegan
