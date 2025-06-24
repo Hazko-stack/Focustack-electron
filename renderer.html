@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=EG+Garamond:wght@400;500;600;700&family=Fira+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Pomodoro Timer</title>
+  <style>
+    html {
+      font-family: 'Fira Sans', sans-serif;
+      font-size: 20px;
+      letter-spacing: 0.8px;
+      min-height: 100vh;
+      color: #d8e9ef;
+      background-image: linear-gradient(-20deg, #025159 0%, #733b36 100%);
+      background-size: cover;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    h1 {
+      margin: 0 auto 10px auto;
+      color: #d8e9ef;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    .app-message {
+      height: 20px;
+      margin: 10px auto 20px auto;
+    }
+
+    .app-container {
+      width: 250px;
+      height: 420px;
+      margin: 40px auto;
+      text-align: center;
+      border-radius: 5px;
+      padding: 20px;
+    }
+
+    .app-circle {
+      position: relative;
+      margin: 0 auto;
+      width: 200px;
+      height: 200px;
+    }
+
+    .circle-shape {
+      pointer-events: none;
+    }
+
+    .semi-circle {
+      position: absolute;
+      width: 100px;
+      height: 200px;
+      box-sizing: border-box;
+      border: solid 6px;
+    }
+
+    .left-side {
+      top: 0;
+      left: 0;
+      transform-origin: right center;
+      transform: rotate(0deg);
+      border-top-left-radius: 100px;
+      border-bottom-left-radius: 100px;
+      border-right: none;
+      z-index: 1;
+    }
+
+    .right-side {
+      top: 0;
+      left: 100px;
+      transform-origin: left center;
+      transform: rotate(0deg);
+      border-top-right-radius: 100px;
+      border-bottom-right-radius: 100px;
+      border-left: none;
+    }
+
+    .circle {
+      border-color: #bf5239;
+    }
+
+    .circle-mask {
+      border-color: #e85a71;
+    }
+
+    .app-counter-box {
+      font-family: 'Droid Sans Mono', monospace;
+      font-size: 250%;
+      position: relative;
+      top: 50px;
+      color: #d8e9ef;
+    }
+
+    button {
+      position: relative;
+      top: 50px;
+      font-size: 80%;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border: none;
+      background: none;
+      outline: none;
+      color: #d8e9ef;
+      cursor: pointer;
+      padding: 10px;
+      transition: color 0.2s ease;
+    }
+
+    button:hover {
+      color: #90c0d1;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .reset-btn {
+      margin-left: 10px;
+    }
+
+    .time-settings {
+      margin: 20px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .time-input-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .time-input {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+      color: #d8e9ef;
+      padding: 5px 10px;
+      width: 60px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .time-input:focus {
+      outline: none;
+      border-color: #90c0d1;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .preset-buttons {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .preset-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 15px;
+      color: #d8e9ef;
+      padding: 3px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: static;
+      top: auto;
+    }
+
+    .preset-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: #90c0d1;
+    }
+
+    .preset-btn.active {
+      background: #90c0d1;
+      color: #025159;
+      border-color: #90c0d1;
+    }
+
+    .settings-toggle {
+      background: none;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+      color: #d8e9ef;
+      padding: 3px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      position: static;
+      top: auto;
+    }
+
+    .settings-toggle:hover {
+      border-color: #90c0d1;
+    }
+
+    .settings-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .settings-panel.show {
+      max-height: 200px;
+    }
+
+    .keyboard-shortcuts {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      font-size: 10px;
+      opacity: 0.7;
+      line-height: 1.2;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <h1>pomodoro</h1>
+    <button class="settings-toggle">⚙️ Settings</button>
+    
+    <div class="settings-panel">
+      <div class="time-settings">
+        <div class="time-input-group">
+          <label>Min:</label>
+          <input type="number" class="time-input" id="minutes-input" min="1" max="120" value="25">
+          <label>Sec:</label>
+          <input type="number" class="time-input" id="seconds-input" min="0" max="59" value="0">
+        </div>
+        <div class="preset-buttons">
+          <button class="preset-btn active" data-minutes="25" data-seconds="0">25:00</button>
+          <button class="preset-btn" data-minutes="15" data-seconds="0">15:00</button>
+          <button class="preset-btn" data-minutes="30" data-seconds="0">30:00</button>
+          <button class="preset-btn" data-minutes="45" data-seconds="0">45:00</button>
+          <button class="preset-btn" data-minutes="5" data-seconds="0">5:00</button>
+          <button class="preset-btn" data-minutes="1" data-seconds="30">1:30</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="app-message">press start to begin</div>
+    <div class="app-circle">
+      <div class="circle-shape">
+        <div class="semi-circle right-side circle-mask"></div>
+        <div class="semi-circle right-side circle"></div>
+        <div class="semi-circle left-side circle-mask"></div>
+        <div class="semi-circle left-side circle"></div>
+      </div>
+      <div class="app-counter-box">
+        <p><span class="minutes">25</span>:<span class="seconds">00</span></p>
+      </div>
+      <button class="btn-start">start</button>
+      <button class="btn-pause">pause</button>
+      <button class="btn-reset reset-btn">reset</button>
+    </div>
+  </div>
+
+  <div class="keyboard-shortcuts">
+    Space: Start/Resume<br>
+    Ctrl+P: Pause<br>
+    Ctrl+R: Reset<br>
+    Ctrl+S: Settings
+  </div>
+
+  <script>
+    // Create a simple bell sound using Web Audio API
+    const createBellSound = () => {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 1);
+    };
+
+    const startBtn = document.querySelector('.btn-start');
+    const pauseBtn = document.querySelector('.btn-pause');
+    const resetBtn = document.querySelector('.btn-reset');
+    const session = document.querySelector('.minutes');
+    const secondsDisplay = document.querySelector('.seconds');
+    const messageDiv = document.querySelector('.app-message');
+    const minutesInput = document.getElementById('minutes-input');
+    const secondsInput = document.getElementById('seconds-input');
+    const settingsToggle = document.querySelector('.settings-toggle');
+    const settingsPanel = document.querySelector('.settings-panel');
+    const presetButtons = document.querySelectorAll('.preset-btn');
+    
+    let myInterval;
+    let state = true; // true = stopped, false = running
+    let isPaused = false;
+    let totalSeconds = 25 * 60; // Default 25 minutes
+    let originalTotalSeconds = 25 * 60; // Keep track of original duration for progress
+
+    const updateTimeDisplay = () => {
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      session.textContent = minutes;
+      secondsDisplay.textContent = seconds < 10 ? '0' + seconds : seconds;
+    };
+
+    const getCurrentTimerDuration = () => {
+      const minutes = parseInt(minutesInput.value) || 25;
+      const seconds = parseInt(secondsInput.value) || 0;
+      return minutes * 60 + seconds;
+    };
+
+    const setTimerFromInputs = () => {
+      if (state && !isPaused) { // Only update if timer is stopped
+        totalSeconds = getCurrentTimerDuration();
+        originalTotalSeconds = totalSeconds;
+        updateTimeDisplay();
+        
+        // Reset circle progress
+        const rightSide = document.querySelector('.right-side.circle');
+        const leftSide = document.querySelector('.left-side.circle');
+        rightSide.style.transform = 'rotate(0deg)';
+        leftSide.style.transform = 'rotate(0deg)';
+      }
+    };
+
+    const updateCircleProgress = (remainingSeconds, totalDuration) => {
+      const progress = (totalDuration - remainingSeconds) / totalDuration;
+      const degrees = progress * 360;
+      
+      const rightSide = document.querySelector('.right-side.circle');
+      const leftSide = document.querySelector('.left-side.circle');
+      
+      if (degrees <= 180) {
+        rightSide.style.transform = `rotate(${degrees}deg)`;
+        leftSide.style.transform = 'rotate(0deg)';
+      } else {
+        rightSide.style.transform = 'rotate(180deg)';
+        leftSide.style.transform = `rotate(${degrees - 180}deg)`;
+      }
+    };
+
+    const updateTitle = (minutesLeft, secondsLeft) => {
+      const timeString = `${minutesLeft}:${secondsLeft < 10 ? '0' + secondsLeft : secondsLeft}`;
+      if (window.electronAPI) {
+        window.electronAPI.setTitle(`Pomodoro - ${timeString}`);
+      }
+    };
+
+    const showNotification = (title, body) => {
+      if (window.electronAPI) {
+        window.electronAPI.showNotification(title, body);
+      }
+    };
+
+    const appTimer = () => {
+      if (state && !isPaused) {
+        // Starting fresh timer
+        state = false;
+        startBtn.textContent = 'running';
+        startBtn.disabled = true;
+        pauseBtn.disabled = false;
+        messageDiv.textContent = 'focus time!';
+        
+        // Get current time from inputs
+        totalSeconds = getCurrentTimerDuration();
+        originalTotalSeconds = totalSeconds;
+
+        const updateSeconds = () => {
+          totalSeconds--;
+
+          let minutesLeft = Math.floor(totalSeconds / 60);
+          let secondsLeft = totalSeconds % 60;
+
+          session.textContent = `${minutesLeft}`;
+          secondsDisplay.textContent = secondsLeft < 10 ? '0' + secondsLeft : secondsLeft;
+
+          // Update window title
+          updateTitle(minutesLeft, secondsLeft);
+
+          // Update circle progress
+          updateCircleProgress(totalSeconds, originalTotalSeconds);
+
+          if (minutesLeft === 0 && secondsLeft === 0) {
+            createBellSound();
+            showNotification('Pomodoro Timer', 'Time\'s up! Take a break.');
+            clearInterval(myInterval);
+            startBtn.textContent = 'start';
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            messageDiv.textContent = 'time\'s up! take a break';
+            if (window.electronAPI) {
+              window.electronAPI.setTitle('Pomodoro Timer');
+            }
+            state = true;
+            isPaused = false;
+          }
+        };
+
+        myInterval = setInterval(updateSeconds, 1000);
+      } else if (isPaused) {
+        // Resuming from pause
+        isPaused = false;
+        startBtn.textContent = 'running';
+        startBtn.disabled = true;
+        pauseBtn.disabled = false;
+        messageDiv.textContent = 'focus time!';
+
+        const updateSeconds = () => {
+          totalSeconds--;
+
+          let minutesLeft = Math.floor(totalSeconds / 60);
+          let secondsLeft = totalSeconds % 60;
+
+          session.textContent = `${minutesLeft}`;
+          secondsDisplay.textContent = secondsLeft < 10 ? '0' + secondsLeft : secondsLeft;
+
+          // Update window title
+          updateTitle(minutesLeft, secondsLeft);
+
+          // Update circle progress
+          updateCircleProgress(totalSeconds, originalTotalSeconds);
+
+          if (minutesLeft === 0 && secondsLeft === 0) {
+            createBellSound();
+            showNotification('Pomodoro Timer', 'Time\'s up! Take a break.');
+            clearInterval(myInterval);
+            startBtn.textContent = 'start';
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            messageDiv.textContent = 'time\'s up! take a break';
+            if (window.electronAPI) {
+              window.electronAPI.setTitle('Pomodoro Timer');
+            }
+            state = true;
+            isPaused = false;
+          }
+        };
+
+        myInterval = setInterval(updateSeconds, 1000);
+      }
+    };
+
+    const pauseTimer = () => {
+      if (!state && !isPaused) {
+        // Currently running, so pause it
+        clearInterval(myInterval);
+        isPaused = true;
+        startBtn.textContent = 'resume';
+        startBtn.disabled = false;
+        pauseBtn.disabled = true;
+        messageDiv.textContent = 'paused';
+        if (window.electronAPI) {
+          window.electronAPI.setTitle('Pomodoro Timer - Paused');
+        }
+      }
+    };
+
+    const resetTimer = () => {
+      clearInterval(myInterval);
+      state = true;
+      isPaused = false;
+      startBtn.textContent = 'start';
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      messageDiv.textContent = 'press start to begin';
+      
+      // Reset to current input values
+      totalSeconds = getCurrentTimerDuration();
+      originalTotalSeconds = totalSeconds;
+      updateTimeDisplay();
+      
+      if (window.electronAPI) {
+        window.electronAPI.setTitle('Pomodoro Timer');
+      }
+      
+      // Reset circle progress
+      const rightSide = document.querySelector('.right-side.circle');
+      const leftSide = document.querySelector('.left-side.circle');
+      rightSide.style.transform = 'rotate(0deg)';
+      leftSide.style.transform = 'rotate(0deg)';
+    };
+
+    // Initialize button states
+    pauseBtn.disabled = true;
+
+    // Settings panel toggle
+    settingsToggle.addEventListener('click', () => {
+      settingsPanel.classList.toggle('show');
+    });
+
+    // Time input event listeners
+    minutesInput.addEventListener('input', () => {
+      if (minutesInput.value < 1) minutesInput.value = 1;
+      if (minutesInput.value > 120) minutesInput.value = 120;
+      setTimerFromInputs();
+      updateActivePreset();
+    });
+
+    secondsInput.addEventListener('input', () => {
+      if (secondsInput.value < 0) secondsInput.value = 0;
+      if (secondsInput.value > 59) secondsInput.value = 59;
+      setTimerFromInputs();
+      updateActivePreset();
+    });
+
+    // Preset buttons
+    const updateActivePreset = () => {
+      const currentMinutes = parseInt(minutesInput.value);
+      const currentSeconds = parseInt(secondsInput.value);
+      
+      presetButtons.forEach(btn => {
+        const presetMinutes = parseInt(btn.dataset.minutes);
+        const presetSeconds = parseInt(btn.dataset.seconds);
+        
+        if (currentMinutes === presetMinutes && currentSeconds === presetSeconds) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    };
+
+    presetButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const minutes = parseInt(btn.dataset.minutes);
+        const seconds = parseInt(btn.dataset.seconds);
+        
+        minutesInput.value = minutes;
+        secondsInput.value = seconds;
+        
+        setTimerFromInputs();
+        updateActivePreset();
+      });
+    });
+
+    // Event listeners for buttons
+    startBtn.addEventListener('click', appTimer);
+    pauseBtn.addEventListener('click', pauseTimer);
+    resetBtn.addEventListener('click', resetTimer);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        appTimer();
+      } else if (e.ctrlKey && e.code === 'KeyP') {
+        e.preventDefault();
+        pauseTimer();
+      } else if (e.ctrlKey && e.code === 'KeyR') {
+        e.preventDefault();
+        resetTimer();
+      } else if (e.ctrlKey && e.code === 'KeyS') {
+        e.preventDefault();
+        settingsPanel.classList.toggle('show');
+      }
+    });
+
+    // Listen for menu commands if Electron API is available
+    if (window.electronAPI) {
+      window.electronAPI.onStartTimer(() => appTimer());
+      window.electronAPI.onPauseTimer(() => pauseTimer());
+      window.electronAPI.onResetTimer(() => resetTimer());
+      window.electronAPI.onToggleSettings(() => {
+        settingsPanel.classList.toggle('show');
+      });
+    }
+
+    // Initialize display
+    updateTimeDisplay();
+  </script>
+</body>
+</html>
